@@ -31,20 +31,20 @@ func main() {
 	ctx := context.Background()
 
 	var cryptoOracle oracle.CryptoOracle
-	var targetCrypto []string
+	var targetCryptos []string
 
 	switch *flagCryptoOracle {
 	case coinGecko:
 		cryptoOracle = oracle.CoinGecko{}
-		targetCrypto = *coinGeckoTargetCryptoIDs
+		targetCryptos = *coinGeckoTargetCryptoIDs
 	case coinMarketCap:
 		cryptoOracle = oracle.CMC{APIKey: *cmcAPIKey}
-		targetCrypto = *cmcCryptoSymbols
+		targetCryptos = *cmcCryptoSymbols
 	default:
 		log.Fatalf("Unmatched crypto oracle %s\n", *flagCryptoOracle)
 	}
 
-	quoteItems, err := cryptoOracle.GetQuoteItems(ctx, targetCrypto)
+	quoteItems, err := cryptoOracle.GetQuoteItems(ctx, targetCryptos)
 	if err != nil {
 		log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
 	}
