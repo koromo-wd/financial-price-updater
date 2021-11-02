@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
@@ -72,6 +73,10 @@ func (cmc CMC) GetQuoteItems(ctx context.Context, targetCryptoSymbols []string) 
 	for _, v := range jsonRes.Data {
 		targetItems = append(targetItems, v)
 	}
+
+	sort.Slice(targetItems, func(i, j int) bool {
+		return targetItems[i].Symbol < targetItems[j].Symbol
+	})
 
 	return targetItems, nil
 }
