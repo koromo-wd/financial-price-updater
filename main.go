@@ -9,15 +9,19 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-const version = "1.0.0"
+const version = "1.1.0"
+const coinGecko = "coingecko"
+const coinMarketCap = "coinmarketcap"
 const usd = "USD"
 
 var (
-	cmcAPIKey                     = kingpin.Flag("cmc-apikey", "CoinMarketCap API Key").Short('k').Envar("CMC_API_KEY").Required().String()
-	targetCryptoSymbols           = kingpin.Flag("target-symbols", "List of target CryptoCurrency symbols").Short('t').Envar("TARGET_CRYPTO_SYMBOLS").Default("BTC", "ETH").Strings()
-	googleSheetServiceAccountPath = kingpin.Flag("gsheet-sa-path", "Path to Google Sheet service account token").Short('s').Envar("GSHEET_SA_PATH").Required().String()
-	googleSheetID                 = kingpin.Flag("gsheet-id", "Google Sheet ID").Short('i').Short('i').Envar("GSHEET_ID").Required().String()
-	googleSheetRange              = kingpin.Flag("gsheet-range", "Google Sheet range to work on").Short('r').Envar("GSHEET_RANGE").Default("Sheet1!A1:B").String()
+	flagCryptoOracle         = kingpin.Flag("crypto-oracle", "Crypto oracle").PlaceHolder(coinGecko + "/" + coinMarketCap).Envar("CRYPTO_ORACLE").Default(coinGecko).String()
+	coinGeckoTargetCryptoIDs = kingpin.Flag("coingecko-crypto-ids", "List of target Crypto IDs, used for CoinGecko").Envar("COINGECKO_CRYPTO_IDS").Default("bitcoin", "ethereum").Strings()
+	cmcCryptoSymbols         = kingpin.Flag("crypto-symbols", "List of target Crypto symbols, used for CoinMarketCap").Envar("CMC_CRYPTO_SYMBOLS").Default("BTC", "ETH").Strings()
+	cmcAPIKey                = kingpin.Flag("cmc-apikey", "CoinMarketCap API Key").Envar("CMC_API_KEY").String()
+	googleSheetSAPath        = kingpin.Flag("gsheet-sa-path", "Path to Google Sheet service account token").Envar("GSHEET_SA_PATH").Required().String()
+	googleSheetID            = kingpin.Flag("gsheet-id", "Google Sheet ID").Envar("GSHEET_ID").Required().String()
+	googleSheetRange         = kingpin.Flag("gsheet-range", "Google Sheet range to work on").Envar("GSHEET_RANGE").Default("Sheet1!A1:B").String()
 )
 
 func main() {
@@ -26,16 +30,27 @@ func main() {
 
 	ctx := context.Background()
 
-	cryptoOracle := oracle.CMC{
-		APIKey: *cmcAPIKey,
+	var cryptoOracle oracle.CryptoOracle
+	var targetCrypto []string
+
+	switch *flagCryptoOracle {
+	case coinGecko:
+		cryptoOracle = oracle.CoinGecko{}
+		targetCrypto = *coinGeckoTargetCryptoIDs
+	case coinMarketCap:
+		cryptoOracle = oracle.CMC{APIKey: *cmcAPIKey}
+		targetCrypto = *cmcCryptoSymbols
+	default:
+		log.Fatalf("Unmatched crypto oracle %s\n", *flagCryptoOracle)
 	}
-	quoteItems, err := cryptoOracle.GetQuoteItems(ctx, *targetCryptoSymbols)
+
+	quoteItems, err := cryptoOracle.GetQuoteItems(ctx, targetCrypto)
 	if err != nil {
 		log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
 	}
 
 	priceUpdater := updater.NewGoogleSheet(
-		*googleSheetServiceAccountPath,
+		*googleSheetSAPath,
 		*googleSheetID,
 		*googleSheetRange,
 	)
@@ -45,7 +60,7 @@ func main() {
 		tradingPairs = append(tradingPairs, updater.TradingPair{
 			BaseSymbol:  v.Symbol,
 			QuoteSymbol: usd,
-			Price:       v.Quote.USD.Price,
+			Price:       v.USDPrice,
 			UpdatedTime: v.LastUpdated,
 		})
 	}

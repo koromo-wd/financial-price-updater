@@ -6,25 +6,24 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"sort"
 	"strings"
 	"time"
 )
 
-const apiKeyQuery string = "CMC_PRO_API_KEY"
-const symbolQuery string = "symbol"
-const quoteURL string = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
+const cmcQuoteURL string = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
+const cmcAPIKeyQuery string = "CMC_PRO_API_KEY"
+const cmcSymbolQuery string = "symbol"
 
 type CMC struct {
 	APIKey string
 }
 
-type QuoteJSONResponse struct {
-	Status map[string]interface{} `json:"status"`
-	Data   map[string]QuoteItem   `json:"data"`
+type CMCQuoteJSONResponse struct {
+	Status map[string]interface{}  `json:"status"`
+	Data   map[string]CMCQuoteItem `json:"data"`
 }
 
-type QuoteItem struct {
+type CMCQuoteItem struct {
 	Id          int       `json:"id"`
 	Name        string    `json:"name"`
 	Symbol      string    `json:"symbol"`
@@ -38,19 +37,20 @@ type QuoteItem struct {
 }
 
 func (cmc CMC) GetQuoteItems(ctx context.Context, targetCryptoSymbols []string) ([]QuoteItem, error) {
-	url, err := buildURLWithQueryParams(quoteURL, []query{
+	url, err := buildURLWithQueryParams(cmcQuoteURL, []query{
 		{
-			key:   apiKeyQuery,
+			key:   cmcAPIKeyQuery,
 			value: cmc.APIKey,
 		},
 		{
-			key:   symbolQuery,
+			key:   cmcSymbolQuery,
 			value: strings.Join(targetCryptoSymbols, ","),
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail to build quote URL")
+		return nil, err
 	}
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("fail to request quote data from CoinMarketCap")
@@ -63,20 +63,23 @@ func (cmc CMC) GetQuoteItems(ctx context.Context, targetCryptoSymbols []string) 
 		return nil, err
 	}
 
-	var jsonRes QuoteJSONResponse
+	var jsonRes CMCQuoteJSONResponse
 	if err := json.Unmarshal(body, &jsonRes); err != nil {
 		return nil, err
 	}
 
-	var targetItems []QuoteItem
-
+	var quoteItems []QuoteItem
 	for _, v := range jsonRes.Data {
-		targetItems = append(targetItems, v)
+		quoteItems = append(quoteItems, QuoteItem{
+			Symbol:      v.Symbol,
+			Name:        v.Name,
+			Slug:        v.Slug,
+			LastUpdated: v.LastUpdated,
+			USDPrice:    v.Quote.USD.Price,
+		})
 	}
 
-	sort.Slice(targetItems, func(i, j int) bool {
-		return targetItems[i].Symbol < targetItems[j].Symbol
-	})
+	sortQuoteItems(quoteItems)
 
-	return targetItems, nil
+	return quoteItems, nil
 }
