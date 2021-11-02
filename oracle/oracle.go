@@ -7,12 +7,10 @@ import (
 	"time"
 )
 
-// CryptoOracle represents price oracle for cryptocurrency
 type CryptoOracle interface {
-	GetQuoteItems(ctx context.Context, targetCryptoSymbols []string) ([]QuoteItem, error)
+	GetQuoteItems(ctx context.Context, targetCrypto []string) ([]QuoteItem, error)
 }
 
-// QuoteItem represents currency/token quote information
 type QuoteItem struct {
 	Symbol      string
 	Name        string
