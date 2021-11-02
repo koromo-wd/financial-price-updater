@@ -31,6 +31,10 @@ func (updater GoogleSheet) UpdatePrice(ctx context.Context, tradingPairs []Tradi
 		return err
 	}
 
+	if err := deleteExistingCells(svc, updater.SheetID, updater.WriteRange); err != nil {
+		return err
+	}
+
 	writeVal := [][]interface{}{}
 	writeVal = append(writeVal, headerRow)
 
@@ -47,5 +51,12 @@ func (updater GoogleSheet) UpdatePrice(ctx context.Context, tradingPairs []Tradi
 		return fmt.Errorf("unable to write data to sheet: %w", err)
 	}
 
+	return nil
+}
+
+func deleteExistingCells(svc *sheets.Service, sheetID, clearRange string) error {
+	if _, err := svc.Spreadsheets.Values.Clear(sheetID, clearRange, &sheets.ClearValuesRequest{}).Do(); err != nil {
+		return err
+	}
 	return nil
 }
