@@ -9,7 +9,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-const version = "alpha-3"
+const version = "1.0.0"
 const usd = "USD"
 
 var (
