@@ -1,4 +1,4 @@
-module example.com/financial-price-updater
+module github.com/koromo-wd/financial-price-updater
 
 go 1.17
 

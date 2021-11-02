@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"example.com/financial-price-updater/oracle"
-	"example.com/financial-price-updater/updater"
+	"github.com/koromo-wd/financial-price-updater/oracle"
+	"github.com/koromo-wd/financial-price-updater/updater"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
