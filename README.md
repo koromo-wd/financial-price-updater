@@ -6,7 +6,6 @@
 
 ## TODO
 
-- Add Dockerfile
 - Add Unit test
 - Use oauth to authen Google Sheet API
 - Add stock support
