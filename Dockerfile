@@ -7,10 +7,10 @@ RUN GOOS=linux go build -v -o app
 
 
 FROM debian:buster-slim
-RUN apt-get update && apt-get install -y curl && rm /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN mkdir /app && adduser -D -H -u 1000 -s /bin/false app
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY --from=builder --chown=1000:1000 /build/app /app/financial-price-updater
+COPY --from=builder --chown=1000:1000 /build/app /app/priceupdater
 RUN chown -R 1000:1000 /app
 
 USER 1000
