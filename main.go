@@ -55,19 +55,24 @@ func main() {
 		*googleSheetRange,
 	)
 
-	var tradingPairs []updater.TradingPair
-	for _, v := range quoteItems {
-		tradingPairs = append(tradingPairs, updater.TradingPair{
-			BaseSymbol:  v.Symbol,
-			QuoteSymbol: usd,
-			Price:       v.USDPrice,
-			UpdatedTime: v.LastUpdated,
-		})
-	}
+	tradingPairs := createTradingPairs(quoteItems)
 
 	if err := priceUpdater.UpdatePrice(ctx, tradingPairs); err != nil {
 		log.Fatalf("Couldn't update price: %s", err.Error())
 	}
 
 	log.Print("Finish updating price")
+}
+
+func createTradingPairs(quoteItems []oracle.QuoteItem) []updater.TradingPair {
+	var out []updater.TradingPair
+	for _, v := range quoteItems {
+		out = append(out, updater.TradingPair{
+			BaseSymbol:  v.Symbol,
+			QuoteSymbol: usd,
+			Price:       v.USDPrice,
+			UpdatedTime: v.LastUpdated,
+		})
+	}
+	return out
 }
