@@ -15,4 +15,4 @@ RUN chown -R 1000:1000 /app
 
 USER 1000
 
-ENTRYPOINT ["/docker-entrypoint.sh", "/app/priceupdater"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
