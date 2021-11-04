@@ -3,6 +3,7 @@ module github.com/koromo-wd/priceupdater
 go 1.17
 
 require (
+	github.com/stretchr/testify v1.7.0
 	google.golang.org/api v0.60.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
@@ -16,7 +17,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
 	golang.org/x/oauth2 v0.0.0-20211028175245-ba495a64dcb5 // indirect
