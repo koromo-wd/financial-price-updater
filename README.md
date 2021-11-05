@@ -28,8 +28,8 @@ Run a binary and specify flags or set ENV needed for the use case.
 or
 
 ```bash
-export GSHEET_OAUTH_CRED_PATH=/app/oauth-cred.json
-export GSHEET_OAUTH_TOKEN_PATH=/app/token.json
+export GSHEET_OAUTH_CRED_PATH={yourOauthCredentialPath}
+export GSHEET_OAUTH_TOKEN_PATH={pathToStoreOauthToken}
 export GSHEET_ID={yourGSheetID}
 export COINGECKO_CRYPTO_IDS=bitcoin,ethereum,cardano,polkadot
 
