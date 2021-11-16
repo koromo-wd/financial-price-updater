@@ -35,7 +35,7 @@ func NewGoogleSheet(serviceAccountTokenPath, sheetID, writeRange string) *Google
 func NewGoogleSheetOAuth(credentialPath, tokenStoredPath, sheetID, writeRange string) (*GoogleSheet, error) {
 	b, err := ioutil.ReadFile(credentialPath)
 	if err != nil {
-		return nil, fmt.Errorf("fail to read google sheet oauth credential from path")
+		return nil, fmt.Errorf("fail to read google sheet oauth credential from path: %w", err)
 	}
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
