@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-type CryptoOracle interface {
-	GetQuoteItems(ctx context.Context, targetCrypto []string) ([]QuoteItem, error)
+type Oracle interface {
+	GetQuoteItems(ctx context.Context, queryTargets []string) ([]QuoteItem, error)
 }
 
 type QuoteItem struct {
@@ -17,6 +17,7 @@ type QuoteItem struct {
 	Slug        string
 	LastUpdated time.Time
 	USDPrice    float32
+	Price       map[string]float32
 }
 
 type query struct {

@@ -16,6 +16,7 @@ const gsheetUpdaterSa = "gsheet-sa"
 const gsheetUpdaterOauth = "gsheet-oauth"
 
 const usd = "USD"
+const thb = "THB"
 
 var (
 	flagCryptoOracle         = kingpin.Flag("crypto-oracle", "Crypto oracle").PlaceHolder(coinGecko + "/" + coinMarketCap).Envar("CRYPTO_ORACLE").Default(coinGecko).String()
@@ -28,6 +29,9 @@ var (
 	googleSheetOauthTokPath  = kingpin.Flag("gsheet-oauth-token-path", "Path to Google Sheet stored token").Envar("GSHEET_OAUTH_TOKEN_PATH").Default("/app/token.json").String()
 	googleSheetID            = kingpin.Flag("gsheet-id", "Google Sheet ID").Envar("GSHEET_ID").Required().String()
 	googleSheetRange         = kingpin.Flag("gsheet-range", "Google Sheet range to work on").Envar("GSHEET_RANGE").Default("Sheet1!A1:B").String()
+	thaiSecFundDailyAPIKey   = kingpin.Flag("thsec-fdaily-apikey", "Thai Sec Fund Daily Info API Key").Envar("THSEC_FDAILY_API_KEY").String()
+	thaiSecFundFactAPIKey    = kingpin.Flag("thsec-ffact-apikey", "Thai Sec Fund Fact API Key").Envar("THSEC_FFACT_API_KEY").String()
+	thaiSecFundNames         = kingpin.Flag("thsec-fund-names", "List of target fund names, used for Thai Sec API").Envar("THSEC_FUND_NAMES").Strings()
 )
 
 func main() {
@@ -36,21 +40,12 @@ func main() {
 
 	ctx := context.Background()
 
-	var cryptoOracle oracle.CryptoOracle
-	var targetCryptos []string
-
-	switch *flagCryptoOracle {
-	case coinGecko:
-		cryptoOracle = oracle.CoinGecko{}
-		targetCryptos = *coinGeckoTargetCryptoIDs
-	case coinMarketCap:
-		cryptoOracle = oracle.CMC{APIKey: *cmcAPIKey}
-		targetCryptos = *cmcCryptoSymbols
-	default:
-		log.Fatalf("Unmatched crypto oracle %s\n", *flagCryptoOracle)
+	fundOracle := oracle.ThaiSec{
+		FundFactAPIKey:      *thaiSecFundFactAPIKey,
+		FundDailyInfoAPIKey: *thaiSecFundDailyAPIKey,
 	}
 
-	quoteItems, err := cryptoOracle.GetQuoteItems(ctx, targetCryptos)
+	quoteItems, err := fundOracle.GetQuoteItems(ctx, *thaiSecFundNames)
 	if err != nil {
 		log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
 	}
@@ -96,8 +91,8 @@ func createTradingPairs(quoteItems []oracle.QuoteItem) []updater.TradingPair {
 	for _, v := range quoteItems {
 		out = append(out, updater.TradingPair{
 			BaseSymbol:  v.Symbol,
-			QuoteSymbol: usd,
-			Price:       v.USDPrice,
+			QuoteSymbol: thb,
+			Price:       v.Price[thb],
 			UpdatedTime: v.LastUpdated,
 		})
 	}
