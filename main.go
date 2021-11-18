@@ -16,35 +16,63 @@ const gsheetUpdaterSa = "gsheet-sa"
 const gsheetUpdaterOauth = "gsheet-oauth"
 
 var (
-	flagCryptoOracle         = kingpin.Flag("crypto-oracle", "Crypto oracle").PlaceHolder(coinGecko + "/" + coinMarketCap).Envar("CRYPTO_ORACLE").Default(coinGecko).String()
 	flagUpdater              = kingpin.Flag("updater", "updater to use").Envar("UPDATER").Default(gsheetUpdaterOauth).String()
-	coinGeckoTargetCryptoIDs = kingpin.Flag("coingecko-crypto-ids", "List of target Crypto IDs, used for CoinGecko").Envar("COINGECKO_CRYPTO_IDS").Default("bitcoin", "ethereum").Strings()
-	cmcCryptoSymbols         = kingpin.Flag("crypto-symbols", "List of target Crypto symbols, used for CoinMarketCap").Envar("CMC_CRYPTO_SYMBOLS").Default("BTC", "ETH").Strings()
-	cmcAPIKey                = kingpin.Flag("cmc-apikey", "CoinMarketCap API Key").Envar("CMC_API_KEY").String()
 	googleSheetSAPath        = kingpin.Flag("gsheet-sa-path", "Path to Google Sheet service account token").Envar("GSHEET_SA_PATH").Default("/app/sa.json").String()
 	googleSheetOauthCredPath = kingpin.Flag("gsheet-oauth-cred-path", "Path to Google Sheet oauth credential").Envar("GSHEET_OAUTH_CRED_PATH").Default("/app/oauth-cred.json").String()
 	googleSheetOauthTokPath  = kingpin.Flag("gsheet-oauth-token-path", "Path to Google Sheet stored token").Envar("GSHEET_OAUTH_TOKEN_PATH").Default("/tmp/oauth-token.json").String()
 	googleSheetID            = kingpin.Flag("gsheet-id", "Google Sheet ID").Envar("GSHEET_ID").Required().String()
 	googleSheetRange         = kingpin.Flag("gsheet-range", "Google Sheet range to work on").Envar("GSHEET_RANGE").Default("Sheet1!A1:B").String()
-	thaiSecFundDailyAPIKey   = kingpin.Flag("thsec-fdaily-apikey", "Thai Sec Fund Daily Info API Key").Envar("THSEC_FDAILY_API_KEY").String()
-	thaiSecFundFactAPIKey    = kingpin.Flag("thsec-ffact-apikey", "Thai Sec Fund Fact API Key").Envar("THSEC_FFACT_API_KEY").String()
-	thaiSecFundNames         = kingpin.Flag("thsec-fund-names", "List of target fund names, used for Thai Sec API").Envar("THSEC_FUND_NAMES").Strings()
+
+	cryptoCommand            = kingpin.Command("crypto", "Update crypto price")
+	flagCryptoOracle         = cryptoCommand.Flag("crypto-oracle", "Crypto oracle").PlaceHolder(coinGecko + "/" + coinMarketCap).Envar("CRYPTO_ORACLE").Default(coinGecko).String()
+	coinGeckoTargetCryptoIDs = cryptoCommand.Flag("coingecko-crypto-ids", "List of target Crypto IDs, used for CoinGecko").Envar("COINGECKO_CRYPTO_IDS").Default("bitcoin", "ethereum").Strings()
+	cmcCryptoSymbols         = cryptoCommand.Flag("crypto-symbols", "List of target Crypto symbols, used for CoinMarketCap").Envar("CMC_CRYPTO_SYMBOLS").Default("BTC", "ETH").Strings()
+	cmcAPIKey                = cryptoCommand.Flag("cmc-apikey", "CoinMarketCap API Key").Envar("CMC_API_KEY").String()
+
+	fundCommand            = kingpin.Command("fund", "Update mutual fund price")
+	thaiSecFundDailyAPIKey = fundCommand.Flag("thsec-fdaily-apikey", "Thai Sec Fund Daily Info API Key").Envar("THSEC_FDAILY_API_KEY").String()
+	thaiSecFundFactAPIKey  = fundCommand.Flag("thsec-ffact-apikey", "Thai Sec Fund Fact API Key").Envar("THSEC_FFACT_API_KEY").String()
+	thaiSecFundNames       = fundCommand.Flag("thsec-fund-names", "List of target fund names, used for Thai Sec API").Envar("THSEC_FUND_NAMES").Strings()
 )
 
 func main() {
 	kingpin.Version(version)
-	kingpin.Parse()
-
 	ctx := context.Background()
+	var quoteItems []oracle.QuoteItem
+	var err error
 
-	fundOracle := oracle.ThaiSec{
-		FundFactAPIKey:      *thaiSecFundFactAPIKey,
-		FundDailyInfoAPIKey: *thaiSecFundDailyAPIKey,
-	}
+	switch kingpin.Parse() {
+	case cryptoCommand.FullCommand():
+		log.Print("Updating Crypto price")
 
-	quoteItems, err := fundOracle.GetQuoteItems(ctx, *thaiSecFundNames)
-	if err != nil {
-		log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
+		var cryptoOracle oracle.Oracle
+		var targetCryptos []string
+		switch *flagCryptoOracle {
+		case coinGecko:
+			cryptoOracle = oracle.CoinGecko{}
+			targetCryptos = *coinGeckoTargetCryptoIDs
+		case coinMarketCap:
+			cryptoOracle = oracle.CMC{APIKey: *cmcAPIKey}
+			targetCryptos = *cmcCryptoSymbols
+		default:
+			log.Fatalf("Unmatched crypto oracle %s\n", *flagCryptoOracle)
+		}
+
+		quoteItems, err = cryptoOracle.GetQuoteItems(ctx, targetCryptos)
+		if err != nil {
+			log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
+		}
+	case fundCommand.FullCommand():
+		log.Print("Updating mutual fund price")
+		fundOracle := oracle.ThaiSec{
+			FundFactAPIKey:      *thaiSecFundFactAPIKey,
+			FundDailyInfoAPIKey: *thaiSecFundDailyAPIKey,
+		}
+
+		quoteItems, err = fundOracle.GetQuoteItems(ctx, *thaiSecFundNames)
+		if err != nil {
+			log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
+		}
 	}
 
 	tradingPairs := createTradingPairs(quoteItems)
