@@ -15,9 +15,6 @@ const coinMarketCap = "coinmarketcap"
 const gsheetUpdaterSa = "gsheet-sa"
 const gsheetUpdaterOauth = "gsheet-oauth"
 
-const usd = "USD"
-const thb = "THB"
-
 var (
 	flagCryptoOracle         = kingpin.Flag("crypto-oracle", "Crypto oracle").PlaceHolder(coinGecko + "/" + coinMarketCap).Envar("CRYPTO_ORACLE").Default(coinGecko).String()
 	flagUpdater              = kingpin.Flag("updater", "updater to use").Envar("UPDATER").Default(gsheetUpdaterOauth).String()
