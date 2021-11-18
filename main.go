@@ -26,7 +26,7 @@ var (
 	cmcAPIKey                = kingpin.Flag("cmc-apikey", "CoinMarketCap API Key").Envar("CMC_API_KEY").String()
 	googleSheetSAPath        = kingpin.Flag("gsheet-sa-path", "Path to Google Sheet service account token").Envar("GSHEET_SA_PATH").Default("/app/sa.json").String()
 	googleSheetOauthCredPath = kingpin.Flag("gsheet-oauth-cred-path", "Path to Google Sheet oauth credential").Envar("GSHEET_OAUTH_CRED_PATH").Default("/app/oauth-cred.json").String()
-	googleSheetOauthTokPath  = kingpin.Flag("gsheet-oauth-token-path", "Path to Google Sheet stored token").Envar("GSHEET_OAUTH_TOKEN_PATH").Default("/app/token.json").String()
+	googleSheetOauthTokPath  = kingpin.Flag("gsheet-oauth-token-path", "Path to Google Sheet stored token").Envar("GSHEET_OAUTH_TOKEN_PATH").Default("/tmp/oauth-token.json").String()
 	googleSheetID            = kingpin.Flag("gsheet-id", "Google Sheet ID").Envar("GSHEET_ID").Required().String()
 	googleSheetRange         = kingpin.Flag("gsheet-range", "Google Sheet range to work on").Envar("GSHEET_RANGE").Default("Sheet1!A1:B").String()
 	thaiSecFundDailyAPIKey   = kingpin.Flag("thsec-fdaily-apikey", "Thai Sec Fund Daily Info API Key").Envar("THSEC_FDAILY_API_KEY").String()
@@ -91,8 +91,8 @@ func createTradingPairs(quoteItems []oracle.QuoteItem) []updater.TradingPair {
 	for _, v := range quoteItems {
 		out = append(out, updater.TradingPair{
 			BaseSymbol:  v.Symbol,
-			QuoteSymbol: thb,
-			Price:       v.Price[thb],
+			QuoteSymbol: v.BaseCurrency,
+			Price:       v.Price,
 			UpdatedTime: v.LastUpdated,
 		})
 	}

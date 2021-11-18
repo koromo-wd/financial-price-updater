@@ -60,11 +60,11 @@ func (coinGecko CoinGecko) GetQuoteItems(ctx context.Context, targetCryptoIDs []
 	var quoteItems []QuoteItem
 	for _, v := range jsonRes {
 		quoteItems = append(quoteItems, QuoteItem{
-			Symbol:      strings.ToUpper(v.Symbol),
-			Name:        v.Name,
-			Slug:        v.ID,
-			LastUpdated: v.LastUpdated,
-			USDPrice:    v.CurrentPrice,
+			Symbol:       strings.ToUpper(v.Symbol),
+			Name:         v.Name,
+			LastUpdated:  v.LastUpdated,
+			BaseCurrency: defaultFiat,
+			Price:        v.CurrentPrice,
 		})
 	}
 

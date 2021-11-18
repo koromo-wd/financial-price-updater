@@ -71,11 +71,11 @@ func (cmc CMC) GetQuoteItems(ctx context.Context, targetCryptoSymbols []string) 
 	var quoteItems []QuoteItem
 	for _, v := range jsonRes.Data {
 		quoteItems = append(quoteItems, QuoteItem{
-			Symbol:      v.Symbol,
-			Name:        v.Name,
-			Slug:        v.Slug,
-			LastUpdated: v.LastUpdated,
-			USDPrice:    v.Quote.USD.Price,
+			Symbol:       v.Symbol,
+			Name:         v.Name,
+			LastUpdated:  v.LastUpdated,
+			BaseCurrency: defaultFiat,
+			Price:        v.Quote.USD.Price,
 		})
 	}
 

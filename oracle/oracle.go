@@ -12,12 +12,11 @@ type Oracle interface {
 }
 
 type QuoteItem struct {
-	Symbol      string
-	Name        string
-	Slug        string
-	LastUpdated time.Time
-	USDPrice    float32
-	Price       map[string]float32
+	Symbol       string
+	Name         string
+	LastUpdated  time.Time
+	BaseCurrency string
+	Price        float32
 }
 
 type query struct {

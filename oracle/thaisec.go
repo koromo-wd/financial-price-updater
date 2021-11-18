@@ -73,13 +73,11 @@ func (sec ThaiSec) getQuoteItem(ctx context.Context, fundName, queryNavDate stri
 	}
 
 	return &QuoteItem{
-		Symbol:      fundName,
-		Name:        fundInfo.ProjectABBRName,
-		Slug:        "",
-		LastUpdated: parsedTime,
-		Price: map[string]float32{
-			thb: fundPrice.LastVal,
-		},
+		Symbol:       fundName,
+		Name:         fundInfo.ProjectABBRName,
+		LastUpdated:  parsedTime,
+		BaseCurrency: thb,
+		Price:        fundPrice.LastVal,
 	}, nil
 }
 
