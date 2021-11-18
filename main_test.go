@@ -31,7 +31,7 @@ func TestCreateTradingPairs(t *testing.T) {
 	for i, pair := range pairs {
 		quoteItem := quoteItems[i]
 		assert.Equal(t, quoteItem.Symbol, pair.BaseSymbol)
-		assert.Equal(t, usd, pair.QuoteSymbol)
+		assert.Equal(t, "USD", pair.QuoteSymbol)
 		assert.Equal(t, quoteItem.Price, pair.Price)
 		assert.Equal(t, quoteItem.LastUpdated, pair.UpdatedTime)
 	}
