@@ -42,26 +42,11 @@ func main() {
 	var err error
 
 	switch kingpin.Parse() {
+
 	case cryptoCommand.FullCommand():
 		log.Print("Updating Crypto price")
+		quoteItems = getCryptoQuoteItems(ctx)
 
-		var cryptoOracle oracle.Oracle
-		var targetCryptos []string
-		switch *flagCryptoOracle {
-		case coinGecko:
-			cryptoOracle = oracle.CoinGecko{}
-			targetCryptos = *coinGeckoTargetCryptoIDs
-		case coinMarketCap:
-			cryptoOracle = oracle.CMC{APIKey: *cmcAPIKey}
-			targetCryptos = *cmcCryptoSymbols
-		default:
-			log.Fatalf("Unmatched crypto oracle %s\n", *flagCryptoOracle)
-		}
-
-		quoteItems, err = cryptoOracle.GetQuoteItems(ctx, targetCryptos)
-		if err != nil {
-			log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
-		}
 	case fundCommand.FullCommand():
 		log.Print("Updating mutual fund price")
 		fundOracle := oracle.ThaiSec{
@@ -83,6 +68,29 @@ func main() {
 	}
 
 	log.Print("Finish updating price")
+}
+
+func getCryptoQuoteItems(ctx context.Context) []oracle.QuoteItem {
+	var cryptoOracle oracle.Oracle
+	var targetCryptos []string
+
+	switch *flagCryptoOracle {
+	case coinGecko:
+		cryptoOracle = oracle.CoinGecko{}
+		targetCryptos = *coinGeckoTargetCryptoIDs
+	case coinMarketCap:
+		cryptoOracle = oracle.CMC{APIKey: *cmcAPIKey}
+		targetCryptos = *cmcCryptoSymbols
+	default:
+		log.Fatalf("Unmatched crypto oracle %s\n", *flagCryptoOracle)
+	}
+
+	quoteItems, err := cryptoOracle.GetQuoteItems(ctx, targetCryptos)
+	if err != nil {
+		log.Fatalf("Couldn't retrieve quote data from oracle: %s", err.Error())
+	}
+
+	return quoteItems
 }
 
 func getPriceUpdater() updater.Updater {
