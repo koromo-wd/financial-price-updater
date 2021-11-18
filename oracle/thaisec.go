@@ -20,15 +20,14 @@ type fundInfo struct {
 	ProjectABBRName string `json:"proj_abbr_name"`
 }
 
-type fundPriceResponse struct {
-	LastUpdatedDate string  `json:"last_upd_date"`
-	NavDate         string  `json:"nav_date"`
-	LastVal         float32 `json:"last_val"`
+type fundPriceInfo struct {
+	NavDate string  `json:"nav_date"`
+	LastVal float32 `json:"last_val"`
 }
 
 const thb = "THB"
 const bkkTz = "Asia/Bangkok"
-const navDateOffSet = 5
+const navDateOffSet = 6
 
 const fundInfoURL = "https://api.sec.or.th/FundFactsheet/fund/class_fund"
 const fundPriceURLTemplate = "https://api.sec.or.th/FundDailyInfo/%s/dailynav/%s"
@@ -41,7 +40,7 @@ func (sec ThaiSec) GetQuoteItems(ctx context.Context, targetFundNames []string) 
 	for _, fundName := range targetFundNames {
 		quoteItem, err := sec.getQuoteItem(ctx, fundName, getQueryNavDate(navDateOffSet))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("fundName=%s %w", fundName, err)
 		}
 
 		quoteItems = append(quoteItems, *quoteItem)
@@ -55,35 +54,12 @@ func (sec ThaiSec) GetQuoteItems(ctx context.Context, targetFundNames []string) 
 func (sec ThaiSec) getQuoteItem(ctx context.Context, fundName, queryNavDate string) (*QuoteItem, error) {
 	fundInfo, err := sec.getFundInfo(ctx, fundName)
 	if err != nil {
-		return nil, fmt.Errorf("fail to get TH Sec Fund Info: %w", err)
+		return nil, fmt.Errorf("fail to get fund info from Thai SEC API: %w", err)
 	}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf(fundPriceURLTemplate, fundInfo.ProjectID, queryNavDate), nil)
+	fundPrice, err := sec.getFundPrice(ctx, fundInfo.ProjectID, queryNavDate)
 	if err != nil {
-		return nil, err
-	}
-	req.Header.Set(apiKeyHeader, sec.FundDailyInfoAPIKey)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("fail to request fund price of %s from Thai Sec API", fundName)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("fail to request fund price of %s with status: %d", fundName, resp.StatusCode)
-	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var jsonRes fundPriceResponse
-	if err := json.Unmarshal(body, &jsonRes); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fundID=%s queryNavDate=%s fail to request fund price from Thai SEC API: %w", fundInfo.ProjectID, queryNavDate, err)
 	}
 
 	timeLoc, err := getTimeLoc(bkkTz)
@@ -91,7 +67,7 @@ func (sec ThaiSec) getQuoteItem(ctx context.Context, fundName, queryNavDate stri
 		return nil, err
 	}
 
-	parsedTime, err := time.ParseInLocation(navDateFormat, jsonRes.NavDate, timeLoc)
+	parsedTime, err := time.ParseInLocation(navDateFormat, fundPrice.NavDate, timeLoc)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +78,7 @@ func (sec ThaiSec) getQuoteItem(ctx context.Context, fundName, queryNavDate stri
 		Slug:        "",
 		LastUpdated: parsedTime,
 		Price: map[string]float32{
-			thb: jsonRes.LastVal,
+			thb: fundPrice.LastVal,
 		},
 	}, nil
 }
@@ -128,11 +104,10 @@ func (sec ThaiSec) getFundInfo(ctx context.Context, fundName string) (*fundInfo,
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("fail to request fund info with status: %d", resp.StatusCode)
+		return nil, fmt.Errorf("request returns statusCode=%d", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
-
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -144,6 +119,37 @@ func (sec ThaiSec) getFundInfo(ctx context.Context, fundName string) (*fundInfo,
 	}
 
 	return &jsonRes[0], nil
+}
+
+func (sec ThaiSec) getFundPrice(ctx context.Context, fundID, queryNavDate string) (*fundPriceInfo, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf(fundPriceURLTemplate, fundID, queryNavDate), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set(apiKeyHeader, sec.FundDailyInfoAPIKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request returns statusCode=%d", resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var jsonRes fundPriceInfo
+	if err := json.Unmarshal(body, &jsonRes); err != nil {
+		return nil, err
+	}
+
+	return &jsonRes, nil
 }
 
 func getQueryNavDate(pastDayOffset int) string {
