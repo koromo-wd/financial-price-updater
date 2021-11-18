@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const defaultFiat = "USD"
+
 type Oracle interface {
 	GetQuoteItems(ctx context.Context, queryTargets []string) ([]QuoteItem, error)
 }

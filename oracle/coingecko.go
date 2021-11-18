@@ -23,7 +23,6 @@ type CoinGeckoMarketItem struct {
 const coinGeckoGetMarketDataURL = "https://api.coingecko.com/api/v3/coins/markets"
 const coinGeckoIDsQuery = "ids"
 const coinGeckoVSCurrencyQuery = "vs_currency"
-const defaultFiat = "usd"
 
 func (coinGecko CoinGecko) GetQuoteItems(ctx context.Context, targetCryptoIDs []string) ([]QuoteItem, error) {
 	url, err := buildURLWithQueryParams(coinGeckoGetMarketDataURL, []query{
