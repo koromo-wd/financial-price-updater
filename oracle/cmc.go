@@ -79,7 +79,7 @@ func (cmc CMC) GetQuoteItems(ctx context.Context, targetCryptoSymbols []string) 
 		})
 	}
 
-	sortQuoteItems(quoteItems)
+	sortQuoteItemsAlphabeticallyASC(quoteItems)
 
 	return quoteItems, nil
 }

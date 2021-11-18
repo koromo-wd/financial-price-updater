@@ -68,7 +68,7 @@ func (coinGecko CoinGecko) GetQuoteItems(ctx context.Context, targetCryptoIDs []
 		})
 	}
 
-	sortQuoteItems(quoteItems)
+	sortQuoteItemsAlphabeticallyASC(quoteItems)
 
 	return quoteItems, nil
 }

@@ -46,7 +46,7 @@ func (sec ThaiSec) GetQuoteItems(ctx context.Context, targetFundNames []string) 
 		quoteItems = append(quoteItems, *quoteItem)
 	}
 
-	sortQuoteItems(quoteItems)
+	sortQuoteItemsAlphabeticallyASC(quoteItems)
 
 	return quoteItems, nil
 }

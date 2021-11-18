@@ -40,8 +40,7 @@ func buildURLWithQueryParams(baseURL string, queries []query) (string, error) {
 	return url.String(), nil
 }
 
-// sortQuoteItems (alphabetically asc)
-func sortQuoteItems(quoteItems []QuoteItem) {
+func sortQuoteItemsAlphabeticallyASC(quoteItems []QuoteItem) {
 	sort.Slice(quoteItems, func(i, j int) bool {
 		return quoteItems[i].Symbol < quoteItems[j].Symbol
 	})

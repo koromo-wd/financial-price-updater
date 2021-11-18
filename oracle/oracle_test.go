@@ -27,7 +27,7 @@ func TestBuildURLWithQueryParams(t *testing.T) {
 	assert.Equal(t, "/hello?bar=ham&foo=spam", result)
 }
 
-func TestSortQuoteItems(t *testing.T) {
+func TestSortQuoteItemsAlphabeticallyASC(t *testing.T) {
 	itemA := QuoteItem{
 		Symbol:      "A",
 		Name:        "A Token",
@@ -56,7 +56,7 @@ func TestSortQuoteItems(t *testing.T) {
 		itemB,
 	}
 
-	sortQuoteItems(quoteItems)
+	sortQuoteItemsAlphabeticallyASC(quoteItems)
 
 	assert.Equal(t, itemA, quoteItems[0])
 	assert.Equal(t, itemB, quoteItems[1])
