@@ -1,7 +1,10 @@
-# Project specific
+# Dev
+build
+update-all.sh
+
+# ENV
 .envrc
 .env
-build
 
 # Mac
 .DS_Store
