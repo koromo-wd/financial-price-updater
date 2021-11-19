@@ -27,7 +27,7 @@ type fundPriceInfo struct {
 
 const thb = "THB"
 const bkkTz = "Asia/Bangkok"
-const navDateOffSet = 6
+const navDateOffSet = 10
 
 const fundInfoURL = "https://api.sec.or.th/FundFactsheet/fund/class_fund"
 const fundPriceURLTemplate = "https://api.sec.or.th/FundDailyInfo/%s/dailynav/%s"
