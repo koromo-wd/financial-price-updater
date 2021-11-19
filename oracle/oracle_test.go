@@ -27,27 +27,27 @@ func TestBuildURLWithQueryParams(t *testing.T) {
 	assert.Equal(t, "/hello?bar=ham&foo=spam", result)
 }
 
-func TestSortQuoteItems(t *testing.T) {
+func TestSortQuoteItemsAlphabeticallyASC(t *testing.T) {
 	itemA := QuoteItem{
-		Symbol:      "A",
-		Name:        "A Token",
-		Slug:        "a",
-		LastUpdated: time.UnixMilli(1),
-		USDPrice:    1,
+		Symbol:       "A",
+		Name:         "A Token",
+		LastUpdated:  time.UnixMilli(1),
+		BaseCurrency: "USD",
+		Price:        1,
 	}
 	itemB := QuoteItem{
-		Symbol:      "B",
-		Name:        "B Token",
-		Slug:        "b",
-		LastUpdated: time.UnixMilli(3),
-		USDPrice:    0.8,
+		Symbol:       "B",
+		Name:         "B Token",
+		LastUpdated:  time.UnixMilli(3),
+		BaseCurrency: "USD",
+		Price:        1,
 	}
 	itemC := QuoteItem{
-		Symbol:      "C",
-		Name:        "C Token",
-		Slug:        "c",
-		LastUpdated: time.UnixMilli(2),
-		USDPrice:    20,
+		Symbol:       "C",
+		Name:         "C Token",
+		LastUpdated:  time.UnixMilli(2),
+		BaseCurrency: "USD",
+		Price:        1,
 	}
 
 	quoteItems := []QuoteItem{
@@ -56,7 +56,7 @@ func TestSortQuoteItems(t *testing.T) {
 		itemB,
 	}
 
-	sortQuoteItems(quoteItems)
+	sortQuoteItemsAlphabeticallyASC(quoteItems)
 
 	assert.Equal(t, itemA, quoteItems[0])
 	assert.Equal(t, itemB, quoteItems[1])

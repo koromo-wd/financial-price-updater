@@ -23,7 +23,6 @@ type CoinGeckoMarketItem struct {
 const coinGeckoGetMarketDataURL = "https://api.coingecko.com/api/v3/coins/markets"
 const coinGeckoIDsQuery = "ids"
 const coinGeckoVSCurrencyQuery = "vs_currency"
-const defaultFiat = "usd"
 
 func (coinGecko CoinGecko) GetQuoteItems(ctx context.Context, targetCryptoIDs []string) ([]QuoteItem, error) {
 	url, err := buildURLWithQueryParams(coinGeckoGetMarketDataURL, []query{
@@ -60,15 +59,15 @@ func (coinGecko CoinGecko) GetQuoteItems(ctx context.Context, targetCryptoIDs []
 	var quoteItems []QuoteItem
 	for _, v := range jsonRes {
 		quoteItems = append(quoteItems, QuoteItem{
-			Symbol:      strings.ToUpper(v.Symbol),
-			Name:        v.Name,
-			Slug:        v.ID,
-			LastUpdated: v.LastUpdated,
-			USDPrice:    v.CurrentPrice,
+			Symbol:       strings.ToUpper(v.Symbol),
+			Name:         v.Name,
+			LastUpdated:  v.LastUpdated,
+			BaseCurrency: defaultFiat,
+			Price:        v.CurrentPrice,
 		})
 	}
 
-	sortQuoteItems(quoteItems)
+	sortQuoteItemsAlphabeticallyASC(quoteItems)
 
 	return quoteItems, nil
 }

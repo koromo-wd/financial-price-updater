@@ -7,16 +7,18 @@ import (
 	"time"
 )
 
-type CryptoOracle interface {
-	GetQuoteItems(ctx context.Context, targetCrypto []string) ([]QuoteItem, error)
+const defaultFiat = "USD"
+
+type Oracle interface {
+	GetQuoteItems(ctx context.Context, queryTargets []string) ([]QuoteItem, error)
 }
 
 type QuoteItem struct {
-	Symbol      string
-	Name        string
-	Slug        string
-	LastUpdated time.Time
-	USDPrice    float32
+	Symbol       string
+	Name         string
+	LastUpdated  time.Time
+	BaseCurrency string
+	Price        float32
 }
 
 type query struct {
@@ -39,8 +41,7 @@ func buildURLWithQueryParams(baseURL string, queries []query) (string, error) {
 	return url.String(), nil
 }
 
-// sortQuoteItems (alphabetically asc)
-func sortQuoteItems(quoteItems []QuoteItem) {
+func sortQuoteItemsAlphabeticallyASC(quoteItems []QuoteItem) {
 	sort.Slice(quoteItems, func(i, j int) bool {
 		return quoteItems[i].Symbol < quoteItems[j].Symbol
 	})
