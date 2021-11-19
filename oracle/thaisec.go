@@ -34,6 +34,8 @@ const fundPriceURLTemplate = "https://api.sec.or.th/FundDailyInfo/%s/dailynav/%s
 const apiKeyHeader = "Ocp-Apim-Subscription-Key"
 const navDateFormat = "2006-01-02"
 
+var now = time.Now()
+
 func (sec ThaiSec) GetQuoteItems(ctx context.Context, targetFundNames []string) ([]QuoteItem, error) {
 	var quoteItems []QuoteItem
 
@@ -151,7 +153,7 @@ func (sec ThaiSec) getFundPrice(ctx context.Context, fundID, queryNavDate string
 }
 
 func getQueryNavDate(pastDayOffset int) string {
-	return time.Now().AddDate(0, 0, -1*pastDayOffset).Format(navDateFormat)
+	return now.AddDate(0, 0, -1*pastDayOffset).Format(navDateFormat)
 }
 
 func getTimeLoc(countryTz string) (*time.Location, error) {
