@@ -3,11 +3,13 @@
 ## Current use case
 
 - Cryptocurrency
+- Thai Mutual Fund
 
 ## Supported Oracle
 
 - CoinGecko
 - CoinMarketCap
+- Thai SEC Open API
 
 ## Supported Update destination
 
@@ -21,8 +23,10 @@ Run a binary and specify flags or set ENV needed for the use case.
 
 ### Example
 
+Updating crypto price
+
 ```bash
-./priceupdater --coingecko-crypto-ids=bitcoin,ethereum,cardano,polkadot --gsheet-oauth-cred-path={yourOauthCredentialPath} --gsheet-oauth-token-path={pathToStoreOauthToken} --gsheet-id={yourGSheetID}
+./priceupdater crypto --coingecko-crypto-ids=bitcoin,ethereum,cardano,polkadot --gsheet-oauth-cred-path={yourOauthCredentialPath} --gsheet-oauth-token-path={pathToStoreOauthToken} --gsheet-id={yourGSheetID}
 ```
 
 or
@@ -33,10 +37,22 @@ export GSHEET_OAUTH_TOKEN_PATH={pathToStoreOauthToken}
 export GSHEET_ID={yourGSheetID}
 export COINGECKO_CRYPTO_IDS=bitcoin,ethereum,cardano,polkadot
 
-./priceupdater
+./priceupdater crypto
+```
+
+Updating mutualfund price
+
+```bash
+export GSHEET_OAUTH_CRED_PATH={yourOauthCredentialPath}
+export GSHEET_OAUTH_TOKEN_PATH={pathToStoreOauthToken}
+export GSHEET_ID={yourGSheetID}
+export THSEC_FFACT_API_KEY={apiKey1}
+export THSEC_FDAILY_API_KEY={apiKey2}
+export THSEC_FUND_NAMES=SCBNK225,SCBEUEQ
+
+./priceupdater fund
 ```
 
 ## TODO
 
 - Add stock support
-- Add mutual fund support
